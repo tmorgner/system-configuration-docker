@@ -1,0 +1,46 @@
+version: "3.3"
+
+services:
+
+  traefik:
+    image: "traefik:v2.5"
+    container_name: "traefik"
+    command:
+      - "--accesslog=true"
+      # - "--log.level=DEBUG"
+      # - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.traefik.address=:8080"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/run/podman/podman.sock:/var/run/docker.sock:ro"
+    networks:
+      - proxynet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`${hostname.router}`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      # - "traefik.http.routers.traefik.middlewares=traefik-auth"
+      # - "traefik.http.middlewares.traefik-auth.basicAuth.users=test:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/" # test:test
+      - "traefik.http.services.traefik.loadbalancer.server.port=80"
+
+  whoami:
+    image: docker.io/jwilder/whoami
+    #    image: "traefik/whoami"
+    container_name: "whoami"
+    networks:
+      - proxynet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`{hostname.whoami}`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
+      - "traefik.http.services.whoami.loadbalancer.server.port=8000"
+
+networks:
+  proxynet:
+    name: public_network

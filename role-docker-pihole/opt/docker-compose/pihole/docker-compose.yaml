@@ -1,0 +1,35 @@
+version: "2.2"
+
+# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    environment:
+      TZ: 'Europe/London'
+      WEBPASSWORD: "piholesd0op2a"
+    # Volumes store your data between container upgrades
+    volumes:
+      - '/etc/pihole/pihole/:/etc/pihole/'
+      - '/etc/pihole/dnsmasq.d/:/etc/dnsmasq.d/'
+    # Recommended but not required (DHCP needs NET_ADMIN)
+    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    # cap_add:
+    #   - NET_ADMIN
+    networks:
+      pihole_net:
+        ipv4_address: ${pihole.ip}
+
+
+networks:
+  pihole_net:
+     driver: macvlan
+     driver_opts:
+       parent: br0
+     ipam:
+       driver: default
+       config:
+         - subnet: ${pihole.net}
+           gateway: ${pihole.gateway}
+           ip_range: ${pihole.dhcp-range}
+

@@ -1,0 +1,5 @@
+{
+  "ipv6": true,
+  "fixed-cidr-v6": "2a02:8010:69e2:0:eeee:ff:0:0/96",
+  "log-driver": "journald"
+}

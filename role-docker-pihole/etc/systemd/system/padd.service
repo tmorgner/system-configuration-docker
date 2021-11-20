@@ -1,0 +1,11 @@
+[Unit]
+Description=PADD
+Requisite=docker-compose@pihole.service
+After=docker-compose@pihole.service getty@tty1.servicce rc-local.service
+
+[Service]
+StandardOutput=tty
+ExecStart=/bin/dash -c 'while :; do /opt/docker-compose/pihole/padd.sh; sleep 1; done'
+
+[Install]
+WantedBy=multi-user.target

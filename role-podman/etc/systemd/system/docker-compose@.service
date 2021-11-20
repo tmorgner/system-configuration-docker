@@ -1,0 +1,24 @@
+[Unit]
+Description=docker-compose %i service for podman
+Requires=podman.service network-online.target
+After=podman.service network-online.target 
+
+[Service]
+Environment=DOCKER_HOST=unix:///run/podman/podman.sock
+WorkingDirectory=/opt/docker-compose/%i
+Type=simple
+TimeoutStartSec=15min
+Restart=always
+
+ExecStartPre=/usr/local/bin/docker-compose pull --quiet --ignore-pull-failures
+ExecStartPre=/usr/local/bin/docker-compose build --pull
+
+ExecStart=/usr/local/bin/docker-compose up --remove-orphans --no-color
+
+ExecStop=/usr/local/bin/docker-compose down --remove-orphans --no-color
+
+ExecReload=/usr/local/bin/docker-compose pull --quiet --ignore-pull-failures
+ExecReload=/usr/local/bin/docker-compose build --pull
+
+[Install]
+WantedBy=multi-user.target

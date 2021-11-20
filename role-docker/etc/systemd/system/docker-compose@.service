@@ -1,0 +1,23 @@
+[Unit]
+Description=docker-compose %i service
+Requires=docker.service network-online.target
+After=docker.service network-online.target
+
+[Service]
+WorkingDirectory=/opt/docker-compose/%i
+Type=simple
+TimeoutStartSec=15min
+Restart=always
+
+ExecStartPre=/usr/local/bin/docker-compose pull --quiet --ignore-pull-failures
+ExecStartPre=/usr/local/bin/docker-compose build --pull
+
+ExecStart=/usr/local/bin/docker-compose up --remove-orphans --no-color
+
+ExecStop=/usr/local/bin/docker-compose down --remove-orphans --no-color
+
+ExecReload=/usr/local/bin/docker-compose pull --quiet --ignore-pull-failures
+ExecReload=/usr/local/bin/docker-compose build --pull
+
+[Install]
+WantedBy=multi-user.target
